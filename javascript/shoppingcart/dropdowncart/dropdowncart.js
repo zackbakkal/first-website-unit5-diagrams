@@ -1,79 +1,75 @@
 /**
- * File Name: cartIcon.js
+ * File Name: dropdowncart.js
  * Author: Zakaria Bakkal
  * Version: 1
- * Date: April 06, 2019
- * Description: This script handles the menu on hand-held devices
- *              that have max-width 767px. The menu first looks like
- *              three horizontal bars, and when it is clicked the 
- *              the menu appears and the menu icon looks like an X.
+ * Date: April 17, 2019
+ * Description: This script handles the shopping cart as a drop down
+ *              when the user hovers over the cart icon.
  */
 
-var cartIcon;     // The div that hosts the cart icon
-var cart;
-var totalQty;
-var totalPrice;
-var myCart;
+var cartIcon;       // The div that hosts the cart icon
+var cart;           // the shopping cart          
+var totalQty;       // the shopping cart total quantity
+var totalPrice;     // the shopping cart total price
+var myCart;         // the drop down cart
 
 /*
 * This function is called when the page has finished loading.
 */
 function start() {
-    // Retrieve the element from the DOM with the id named carticon
+    // Retrieve the element from the DOM with the id named carticonimg
     cartIcon = document.getElementById("carticonimg");
 
-    // Retrieve the element from the DOM with the id named menu and
-    // set its display attribute in the style to 'none'
+    // Retrieve the element from the DOM with the id named cart and
+    // set its display attribute height and width to 0
     cart = document.getElementById("cart");
-    //cart.style.display = "none";
     cart.style.height = "0";
     cart.style.width = "0";
-    // Add an event listner to the element retrieved above. When the element is clicked
-    // call the function named changeLook
+
+    // Add an event listner to the element retrieved above.
+    // When the mouse is over the cart icon the function is executed
     cartIcon.addEventListener("mouseover",
         function () {
-            console.log(cart.style);
-            // Remove the display property from the menu style so that it is shown
-            // after we click again
-            //cart.style.display = "block";
+            // give the drop down cart a border style
             cart.style.borderStyle = "outset";
+            // give a color to the border color
             cart.style.borderColor = "rgb(248, 164, 118)";
+            // make the height auto to fit content
             cart.style.height = "auto";
+            // give the cart a 400px width
             cart.style.width = "400px";
 
-            console.log(cart.className);
-            // Calls the changeLook function and pass the cartIcon element to it which
-            // is represented by the keyword this.
+            // Calls the showCart function
             showCart();
-
         }
         , false);
 
 }
 
 /* 
-* Change how the sandwich bars menu look.
+* Displays the drop down cart
 */
 function showCart() {
 
+    // the drop down cart will only function on computer screens larger than 767px
     if (screen.width > 767) {
+        // instantiate a cart object and load it from local storage
         myCart = new Cart();
         myCart.loadCart(JSON.parse(localStorage.getItem("mycart")));
 
+        // display the items on the drop down cart
         displayItems();
 
-        // Add an event listner to the sanwichbar so that if it is clicked when the 
-        // menu is shown the menu will hide
+        // Add an event listner to the cart icon when the mouse is out
         cartIcon.addEventListener("mouseout",
             function () {
-                // Calls the resetSandwichBar function to change the menu button to
-                // a sandwich look
-                //cart.style.display = "none";
+                // reset the height and width to 0 and hide the border
                 cart.style.height = "0";
                 cart.style.width = "0";
                 cart.style.borderColor = "white";
                 cart.style.borderStyle = "hidden";
 
+                // remove all itmes from the drop down cart
                 while (cart.firstElementChild) {
                     cart.removeChild(cart.firstElementChild);
                 }
@@ -82,13 +78,17 @@ function showCart() {
     }
 }
 
+/*
+* Displays the items on the drop down cart
+*/
 function displayItems() {
-    // remove any children of tableBody element
+    // remove any children of drop down cart
     while (cart.firstElementChild) {
         cart.removeChild(cart.firstElementChild);
     }
 
-    // reset totals
+    // create span element for the total pquantity and price
+    // and reset them to 0
     totalQty = document.createElement("span");
     totalQty.innerHTML = 0;
     totalPrice = document.createElement("span");
@@ -97,7 +97,9 @@ function displayItems() {
     // check if the cart has any products added to it
     if (myCart._totalQty > 0) {
 
+        // create a div respresenting the header of the cart
         var header = document.createElement("div");
+        // add column names to the header
         var itemName = document.createElement("span");
         itemName.innerHTML = "Name";
         header.appendChild(itemName);
@@ -114,6 +116,7 @@ function displayItems() {
         total.innerHTML = "Total";
         header.appendChild(total);
 
+        // add the header to the cart
         cart.appendChild(header);
 
         // Display added items on the cart
@@ -127,12 +130,14 @@ function displayItems() {
         // Display the shopping cart total price of items
         totalPrice.innerHTML = parseFloat((myCart._totalPrice).toFixed(2));
 
+        // create a div that holds the totals
         var totals = document.createElement("div");
         totals.appendChild(totalQty);
         totals.appendChild(totalPrice);
 
+        // ad the totals to the cart
         cart.appendChild(totals);
-    } else {
+    } else {    // the cart is empty
         var div = document.createElement("div");
         var emptyMessage = document.createTextNode("Your Cart is Empty");
         div.appendChild(emptyMessage);
@@ -146,10 +151,6 @@ function displayItems() {
 * Displays the item passed as an argument
 */
 function displayItem(row) {
-
-    // Check if the item exists in the local storage and if
-    // the item quantity is at least 1
-    //if (item && item._qty > 0) {
 
     // Create a table row
     var cartRow = document.createElement("div");
@@ -181,35 +182,6 @@ function displayItem(row) {
     // Add the row to the tableBody
     cart.appendChild(cartRow);
     cart.append(document.createElement("br"));
-}
-
-/*
-* For Internet Explorer compatibility we use this function to toggle between
-* classes.
-*/
-function toggleClass(element, className) {
-    if (element.classList) {
-        // Toggles between the bar1 class and the change class
-        element.classList.toggle(className);
-    } else {
-        // For IE9
-
-        // Retrieve the class attribute content and split the
-        // words at the space to get an array of class names
-        var classes = element.className.split(" ");
-        // Retrieve the index of the class we want to toggle
-        var i = classes.indexOf(className);
-
-        // Check if that class exists
-        if (i >= 0)
-            //If so, remove it from the class list
-            classes.splice(i, 1);
-        else
-            // other wise we add it to the class list
-            classes.push(className);
-        // update the elements class names
-        element.className = classes.join(" ");
-    }
 }
 
 // Add an event listner to the window after the page is loaded
